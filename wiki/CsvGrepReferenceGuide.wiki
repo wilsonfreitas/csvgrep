@@ -1,0 +1,103 @@
+#summary Syntax and command line options
+#labels Phase-Support,Featured
+
+<wiki:toc max_depth="2" />
+
+= Introduction =
+
+*csvgrep* is a command line program that execute search on delimited files, actually CSV files.
+The searches are based on boolean expressions that are stacked to build queries that are executed on delimited files.
+
+*csvgrep* has the following command line options:
+
+{{{
+Options:
+-a      print all fields, except those marked as @hide
+-C      check whether the number of columns remains constant
+-c      put an output separator at the end of each output line
+-g      GUI for Mac OS X
+-I=S    set the string S as the input separator
+		(is overriden when --separator is used)
+-O=S    set the string S as the output separator
+		(is overriden when --separator is used)
+-S=S    set the string S as input and output separators
+		(',' is the default separator)
+-l      print the name of the file into the output
+-L      do not print the name of the file into the output
+-n      print line numbers
+-p      print headers
+-s      show headers only
+-u      unquote fields even if it needs to be quoted
+-v      verbose mode on
+-V      print version
+-w      process file considering the existence of headers
+		headers are defined with @header statement, the default
+		header is $NR == 1 (the first line)
+-h      print this message
+}}}
+
+= Boolean expressions =
+
+Boolean expressions have the following format:
+
+{{{
+REFERENCES [OPERATOR RHS]
+}}}
+
+where:
+
+ * {{{REFERENCES}}}: in *csvgrep* are variables that refers to some field (or column) in a row. References are written as {{{$N}}} where {{{N}}} is the column number or directly by the column name with {{{${Column Name}}}}, the text inside brackets must to match exactly the column name.
+ * {{{OPERATOR}}}: *csvgrep* has many operators, there is a complete list in the section [#Supported_Operators Supported Operators].
+ * {{{RHS}}}: stands for the Right Hand Side and it accepts the following 3 types:
+   * text or regular expressions delimited with {{{""}}} or {{{//}}}. Both representations are valid for text and every text is treated as regular expressions
+   * numbers
+   * shell commands delimited with {{{``}}}
+
+Boolean expressions can be stacked in order to build complex queries and its separator is the semicolon {{{;}}}.
+
+= Supported Operators =
+
+== String operators ==
+
+
+|| *Operator* || *Description* ||
+|| `eq` || match regular expression ||
+|| `ne` || string not match regular expression ||
+|| `in` || text contains string ||
+
+== Numeric operators ==
+
+
+|| *Operator* || *Description* ||
+|| `==` || equals ||
+|| `!=` || not equals ||
+|| `>` || greater than ||
+|| `>=` || greater than or equals to ||
+|| `<` || less than ||
+|| `<=` || less than or equals to ||
+
+= Types supported in right hand side (RHS) =
+
+
+|| *Types* || *Representation* ||
+|| Text || `""` ||
+|| Regular Expressions || `""` or `\\` ||
+|| Numbers || Integers and floating point numbers ||
+|| Shell Command || {{{shell command}}} ||
+
+= Expression functions =
+
+
+|| *Expression function* || *Description* ||
+|| `@hide` || omits the field on output ||
+|| `@header` || specifies the boolean expression that identifies the headers (it's possible to have more than one header per file) ||
+
+= Special references =
+
+
+|| *Special reference* || *Description* ||
+|| `$NR` || number of the row being processed ||
+|| `$NF` || number of fields in the row being processed ||
+|| `$$N` || references the text of the column N's header ||
+|| `$#{.}` or `$#N` || length of the text referenced by `${.}` or `$N` ||
+|| `$?{.}` or `$?N` || evaluates the expression to true if `lowercase(${.})` or `lowercase($N)` equals 'true' ||
