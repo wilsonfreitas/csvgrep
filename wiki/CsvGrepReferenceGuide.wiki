@@ -12,28 +12,29 @@ The searches are based on boolean expressions that are stacked to build queries 
 
 {{{
 Options:
--a      print all fields, except those marked as @hide
--C      check whether the number of columns remains constant
--c      put an output separator at the end of each output line
--g      GUI for Mac OS X
--I=S    set the string S as the input separator
+-a      [print-all] print all fields, except those marked as \@hide and with special variables
+-C      [check] check if the number of columns remains constant
+-c      [close] put a separator at the end of each output line
+-I=S    [input-separator] set the string S as the input separator
 		(is overriden when --separator is used)
--O=S    set the string S as the output separator
+-O=S    [output-separator] set the string S as the output separator
 		(is overriden when --separator is used)
--S=S    set the string S as input and output separators
+-S=S    [io-separator] set the string S as input and output separators
 		(',' is the default separator)
--l      print the name of the file into the output
--L      do not print the name of the file into the output
--n      print line numbers
--p      print headers
--s      show headers only
--u      unquote fields even if it needs to be quoted
--v      verbose mode on
--V      print version
--w      process file considering the existence of headers
-		headers are defined with @header statement, the default
-		header is $NR == 1 (the first line)
--h      print this message
+-f      [filename] send the current input filename to the output stream
+-F      [no-filename] don't print the name of the file into the output
+-l      [list] list filenames of processed files
+-L      [no-list] reverse listing of processed files
+-n      [silent] silent mode use \@print to write
+-N      [number] print line numbers
+-p      [print-headers] print headers
+-s      [headers-only] show headers only
+-u      [unquote] unquote fields even if it needs to be quoted
+-v      [verbose] verbose mode on
+-V      [version] print version
+-w      [word] process file considering the existence of headers headers are defined with \@header statement.
+        The default header is \$NR == 1 (the first line)
+-h      [help] print this message
 }}}
 
 = Boolean expressions =
