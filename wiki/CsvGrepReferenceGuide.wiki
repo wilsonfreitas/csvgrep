@@ -22,7 +22,7 @@ Options:
 -S=S    [io-separator] set the string S as input and output separators
 		(',' is the default separator)
 -f      [filename] send the current input filename to the output stream
--F      [no-filename] don't print the name of the file into the output
+-F      [no-filename] do not print the name of the file into the output
 -l      [list] list filenames of processed files
 -L      [no-list] reverse listing of processed files
 -n      [silent] silent mode use \@print to write
