@@ -1,0 +1,7 @@
+# csvgrep - Easy and funny searches on text delimited files
+
+## Installing csvgrep
+
+1. copy csvgrep.pl into /usr/local/bin
+2. create a link named csvgrep
+

@@ -1,0 +1,115 @@
+/* Cool colors
+	#86b1cd - blue ?? gardenia
+	color: #3B80AE; other blue
+*/
+
+body {
+	width: 80%;
+	padding-left: 10%;
+	background: #FFFFFF;
+	font-family: Garamond, Georgia, 'Times New Roman', serif;
+	font-size: 16px;
+}
+
+h1 {
+	font-size: 48pt;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	color: #CC3300;
+}
+
+h2 {
+	font-size: 24pt;
+	color: #CC3300;
+}
+
+h3 {
+	font-size: 20pt;
+	color: #CC3300;
+}
+
+p {
+	text-align: justify; 
+	line-height: 150%;
+}
+
+code {
+	font-family: 'Andale Mono', Monospace;
+	font-size: 13px;
+}
+
+pre {
+	background: #333333;
+	border: solid 1px #000;
+	color: white;
+	padding: 15px;
+	line-height: 1.1;
+	white-space: pre-wrap;       /* css-3 */
+}
+
+blockquote {
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+table {
+	font-size: inherit;
+	text-align: center;
+	border-collapse: collapse;
+	border: 1px solid black;
+	line-height: 1.5;
+}
+
+table th {
+	background: #99FF99;
+/*	background: #c0c0c0;*/
+	padding: 7px;
+	border: 1px solid black;
+}
+
+table td {
+	padding: 7px;
+	border: 1px solid black;
+}
+
+a {
+	color: #CC3300;
+	text-decoration: underline;
+}
+
+dt {
+	padding-top: 20px;
+	padding-bottom: 5px;
+}
+
+a#downloadable {
+	border:1px solid black;
+	margin-top: 50px;
+	margin-bottom: 50px;
+	margin-left: 30%;
+	margin-right: 30%;
+	padding: 5px;
+	text-align: center;
+	display: block;
+	text-decoration: none;
+	background: #99FF99;
+	color: black;
+}
+
+#quote {
+	margin: 0;
+	border: 0;
+	padding: 0;
+	font-size: large;
+}
+
+#signature {
+	margin: 0;
+	border: 0;
+	padding: 0;
+	margin-bottom: 50px;
+	font-family: cursive;
+}
+
