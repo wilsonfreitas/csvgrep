@@ -1,0 +1,352 @@
+
+
+%!target: gwiki
+
+% #summary Syntax and command line options
+% <wiki:toc max_depth="2" />
+
+= Introduction =
+
+**csvgrep** is an amazing piece of code that comes with a very simple language specially designed to help users in extracting information from delimited text files.
+These files should be built with strange or complex structures that **csvgrep** can do the job.
+
+**csvgrep** works pretty much like the ingenious command line program //grep// which comes inside UNIX boxes.
+As //grep// filters out the lines of a text file based on a given regular expression which is applied to the entire line, **csvgrep**, that is better suited for delimited text files, enables users to filter the lines based on contents of its columns, for example, filter out all lines where the second field doesn't match to a regular expression.
+
+Let's see a few features of **csvgrep** in real life examples.
+Consider the following CSV file named ``contacts.csv`` which represents a contact list.
+
+
+```
+$ cat contacts.csv
+Name,*Email, Notes, IM, Phone
+Wilson, wilson@www.com, Smart guy, wndf, 555-5555
+Lorie, lorie@www.com, hot, lolo, 555-5435
+Jeckill, jeck@jjj.com, , jeck,
+Nando, nando@nano.com, nano guy, nando,
+```
+
+
+Starting with a list of names of all the contacts present in this file. As we know that the first column contains the contacts' names we just do:
+
+
+```
+$ csvgrep '$1' contacts.csv
+Name
+Wilson
+Lorie
+Jeckill
+Nando
+
+```
+
+
+we got the first column, including its header 'Name'.
+At this point is important to mention that the symbol ``$`` followed by something represents a reference to a field or a column of the delimited file and that is an important feature of **csvgrep** known as the //column reference//.
+This reference can be the number of the column or its name and in both cases we are trying to refer a column.
+Deciding to use the column name as a reference we need to specify how to identify the header line and it can be done through the expression function ``@header``.
+
+
+```
+$ csvgrep '@header $NR == 1; ${Name}' contacts.csv 
+Wilson
+Lorie
+Jeckill
+Nando
+
+```
+
+
+Note that when ``${Name}`` is used as a reference to the column name, the header line is not printed.
+If I try to use a reference based on naming conventions without to specify how to find the header (with the ``@header`` expression function) I would receive a fatal error message.
+The reference ``$NR`` is valued to the current register number (it is similar to ``NR`` special variable in //AWK//), so that we are informing that the header is in the first line.
+
+
+```
+$ csvgrep '${Name}' contacts.csv 
+Fatal: An @header field must be defined at /Users/wilson/bin/csvgrep line 184, <INPUT_FILE> line 1.
+```
+
+**First lesson**: Referring to a column using its own name you need to show how to find the name, ie, we need to specify how to find the header line.
+
+% <wiki:comment>
+% In the earlier example we use the boolean expression `$NR == 1`. This is a boolean expression with a numeric operator. In *csvgrep* when a boolean expression uses numeric operators, the operands are coerced to numbers
+% </wiki:comment>
+
+% || Unix Command | csvgrep | Description |
+% | ``awk 'BEGIN{OFS=","} {print $1,$2,$4,$6}'`` | ``csvgrep "0,1,3,5"`` | Print columns 1,2,4,6 delimited by commas |
+% | ``grep "^Doe"`` | ``csvgrep "0=^Doe"`` | Lines starting with Doe is equivalent to first column starting with Doe |
+% | ``awk 'BEGIN{OFS=","} $1 ~ /^Doe/ {print $2,$5}'`` | ``csvgrep "[0=^Doe],1,4"`` | Print the second column when first column begins with Doe |
+
+
+The **csvgrep** command has the following options:
+
+|| Option | Command            | Description |
+| -a      | [print-all]        | print all fields, except those marked with \@hide and with special variables
+| -C      | [check]            | check if the number of columns remains constant
+| -c      | [close]            | put a separator at the end of each output line
+| -I=S    | [input-separator]  | set the string S as the input separator (is overriden when --separator is used)
+| -O=S    | [output-separator] | set the string S as the output separator (is overriden when --separator is used)
+| -S=S    | [io-separator]     | set the string S as input and output separators (',' is the default separator)
+| -f      | [filename]         | send the current input filename to the output stream
+| -F      | [no-filename]      | do not print the name of the file into the output
+| -l      | [list]             | list filenames of processed files
+| -L      | [no-list]          | reverse listing of processed files
+| -n      | [silent]           | silent mode use \@print to write
+| -N      | [number]           | print line numbers
+| -p      | [print-headers]    | print headers
+| -s      | [headers-only]     | show headers only
+| -u      | [unquote]          | unquote fields even if it needs to be quoted
+| -v      | [verbose]          | verbose mode on
+| -V      | [version]          | print version
+| -w      | [word]             | process file considering the existence of headers headers are defined with \@header statement. The default header is \$NR == 1 (the first line)
+| -h      | [help]             | print this message
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Reference Guide
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+= Boolean expressions =
+
+Boolean expressions have the following format:
+
+```
+REFERENCES [OPERATOR RHS]
+```
+
+where:
+
+: ``REFERENCES``
+in **csvgrep** are variables that refers to some field (or column) in a row. References are written as ``$N`` where ``N`` is the column number or directly by the column name with ``${Column Name}``, the text inside brackets must to match exactly the column name.
+: ``OPERATOR``
+**csvgrep** has many operators, there is a complete list in the section [#Supported_Operators Supported Operators].
+: ``RHS``
+stands for the Right Hand Side and it accepts the following 3 types:
+- text or regular expressions delimited with ``""`` or ``//``. Both representations are valid for text and every text is treated as regular expressions
+- numbers
+- shell commands delimited with ``````
+
+
+Boolean expressions can be stacked in order to build complex queries and its separator is the semicolon ``;``.
+
+= Supported Operators =
+
+== String operators ==
+
+
+|| Operator | Description |
+| ``eq``        | match regular expression |
+| ``ne``        | string not match regular expression |
+| ``in``        | text contains string |
+
+
+== Numeric operators ==
+
+
+|| Operator | Description |
+| ``==``        | equals |
+| ``!=``        | not equals |
+| ``>``         | greater than |
+| ``>=``        | greater than or equals to |
+| ``<``         | less than |
+| ``<=``        | less than or equals to |
+
+
+= Types supported in right hand side (RHS) =
+
+
+|| Types              | Representation |
+| Text                | ``""`` |
+| Regular Expressions | ``""`` or ``\\`` |
+| Numbers             | Integers and floating point numbers |
+| Shell Command       | ``shell command`` |
+
+= Expression functions =
+
+
+|| Expression function | Description |
+| ``@hide`` | omits the field on output |
+| ``@header`` | specifies the boolean expression that identifies the headers (it's possible to have more than one header per file) |
+
+= Special references =
+
+
+|| Special reference | Description |
+| ``$NR`` | number of the row being processed |
+| ``$NF`` | number of fields in the row being processed |
+| ``$$N`` | references the text of the column N's header |
+| ``$#{.}`` or ``$#N`` | length of the text referenced by ``${.}`` or ``$N`` |
+| ``$?{.}`` or ``$?N`` | evaluates the expression to true if ``lowercase(${.})`` or ``lowercase($N)`` equals ``true`` |
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% #summary Getting started with csvgrep
+% <!-- wiki:toc max_depth="2" / -->
+
+
+= Using boolean expressions to filter and extract information =
+
+*csvgrep* uses boolean expressions to filter data based on columns' contents.
+The boolean expressions can be built with text and numeric operators.
+In the earlier example we use `$NR == 1`, this is a boolean expression.
+This expression is evaluated to `true` if two operands are equal, numerically speaking.
+*csvgrep* permits to treat operands as numbers or text.
+A complete list of available operands can be found in the [CsvgrepReferenceGuide Reference Guide].
+
+We can go forward and see an example where a boolean expression is used to _grep_ file's contents based on its columns, that's the most common use to csvgrep, at least in my experience.
+Let's find the contacts' names that have an email with `@www.com`.
+
+{{{
+$ csvgrep '@header $NR == 1; ${Name} ; ${Email} eq "@www.com"' contacts.csv 
+Wilson, wilson@www.com
+Lorie, lorie@www.com
+}}}
+
+<wiki:comment>
+The quoted string is treated as a regular expression, so to match the exact text is needed to wrap the text with `^$`, indicating the full string referenced by `${Email}`.
+</wiki:comment>
+*csvgrep* compiles the quoted text as a Perl regular expression (it's very fair since csvgrep is written in Perl), so all set of regular expressions supported for Perl can be used within *csvgrep*.
+We also have the operator `ne` (that negates the operator `eq`) and can use it to find the contacts with non empty Phone number.
+{{{
+$ csvgrep '@header $NR == 1; ${Name} ; ${Phone} ne "^$"' contacts.csv 
+Wilson,555-5555
+Lorie,555-5435
+}}}
+*csvgrep* printed the fields where the regular expression `"^$"` does not match the Phone number.
+The trailing spaces in the columns' values are removed before it's been processed by the boolean expression, so blank spaced fields are empty for *csvgrep*.
+
+The column used within the boolean expression is also printed. We can omit this column in the output using the expression function `@hide`.
+Expression functions in fact are flags to say something to *csvgrep* regarding one boolean expression.
+{{{
+$ csvgrep '@header $NR == 1; ${Name} ; @hide ${Phone} eq /^$/' contacts.csv 
+Jeckill
+Nando
+}}}
+In this example we are saying to *csvgrep* to _hide_ the Phone column, so it's not sent to the output.
+Only the names of the contacts that have empty Phone number were printed.
+The texts in these examples were delimited with "" and //, both representations are valid.
+We can stack as many expression as we want and build more complex queries like
+{{{
+$ csvgrep '@header $NR == 1; ${Name} ; ${Phone} ne /^$/ ; @hide ${Email} eq "@www.com" ; @hide ${Notes} eq "hot"' contacts.csv
+Lorie,555-5435
+}}}
+
+In some case is useful to find contents inside a list, for this we have `in` operator.
+
+{{{
+$ csvgrep '@header $NR == 1; ${Name} in "Charlene Lorie Charles Magnu Carlos Ana Wilson"' contacts.csv
+Wilson
+Lorie
+}}}
+
+it is equivalent to (using regular expressions syntax)
+
+{{{
+$ csvgrep '@header $NR == 1; ${Name} eq "Charlene|Lorie|Charles|Magnu|Carlos|Ana|Wilson"' contacts.csv
+Wilson
+Lorie
+}}}
+
+The `in` operator is most useful when used to search if the text is contained into a file.
+
+{{{
+$ csvgrep '@header $NR == 1; ${Name} in `cat names.txt`' contacts.csv
+Wilson
+Lorie
+}}}
+
+where
+
+{{{
+$ cat names.txt 
+Charlene
+Lorie
+Charles
+Magnu
+Carlos
+Ana
+Wilson
+}}}
+The string delimited by the grave accent is executed as a shell command and its output text is used as a parameter in the right hand side of the boolean expression.
+
+Let's take a look at another file.
+{{{
+Date,Open,High,Low,Close,Volume,Adj Close
+2008-11-17,1494.74,1526.96,1481.70,1482.05,1831540000,1482.05
+2008-11-14,1560.59,1587.76,1513.09,1516.85,2243750000,1516.85
+2008-11-13,1503.06,1596.70,1428.54,1596.70,3009550000,1596.70
+2008-11-12,1555.17,1562.78,1499.21,1499.21,2120870000,1499.21
+2008-11-11,1598.59,1612.42,1563.95,1580.90,1909080000,1580.90
+2008-11-10,1680.67,1680.67,1603.33,1616.74,1674900000,1616.74
+2008-11-07,1629.69,1654.25,1615.51,1647.40,1886230000,1647.40
+2008-11-06,1659.57,1676.92,1603.87,1608.70,2367880000,1608.70
+2008-11-05,1757.01,1764.43,1679.19,1681.64,2092410000,1681.64
+2008-11-04,1761.09,1785.84,1739.81,1780.12,2306350000,1780.12
+2008-11-03,1718.89,1738.53,1713.39,1726.33,1770880000,1726.33
+...
+1971-02-10,100.69,100.69,100.69,100.69,000,100.69
+1971-02-09,100.76,100.76,100.76,100.76,000,100.76
+1971-02-08,100.84,100.84,100.84,100.84,000,100.84
+1971-02-05,100.00,100.00,100.00,100.00,000,100.00
+}}}
+This files was downloaded from [http://finance.yahoo.com Yahoo Finance] and it has the stock values of some company.
+The dates range from 05/02/1971 to 11/17/2008.
+We want to find the dates where the Close price has break the $1000 level.
+{{{
+$ csvgrep '@header $NR == 1 ; $NR ; ${Date} ; ${Close} >= 999 ; @hide ${Close} <= 1001' table.csv 
+3344,1995-08-10,1000.61
+3355,1995-07-26,1000.18
+3363,1995-07-14,999.33
+}}}
+We can see the on 07/14/1995 the Close price was very close to $1000.
+
+One important thing to mention about operators that handle numeric operands is the coercion rules:
+  # the column's content comes as text.
+  # the text is coerced to a number following Perl's coercion engine: any text that doesn't represents a number values 0.
+  # Missing fields are empty strings, so in a numeric context it values 0.
+
+= Filtering information based on its row and column numbers =
+
+*csvgrep* has two special references `$NR` and `$NF`, they refer to the number of the current row and the number of its fields (columns), respectively (these names were borrowed from awk).
+`$NR` was previously used in this tutorial to specify the header: `@header $NR == 1`.
+Another useful application to `$NR` is to filter lines after the Nth one.
+{{{
+$ csvgrep '$NR > 3 ; $1 ; $2' contacts.csv 
+4,Jeckill,jeck@jjj.com
+5,Nando,nando@nano.com
+}}}
+the line number is the first field in the row, to hide it use `@hide` within the first boolean expression.
+
+Suppose in the stocks examples we want to get all points after the first break.
+We saw that at 07/14/1995 the break was very close to occur, we can get all data after this date, it's a good approximation.
+This date is in the line number 3363, so as the data is listed with decreasing the date, we want all row with `$NR` less than 3363:
+{{{
+$ csvgrep '@header $NR == 1 ; $NR <= 3363 ; ${Date} ; ${Close}' table.csv
+2,2008-11-17,1482.05
+3,2008-11-14,1516.85
+4,2008-11-13,1596.70
+5,2008-11-12,1499.21
+...
+3360,1995-07-19,952.87
+3361,1995-07-18,988.53
+3362,1995-07-17,1005.89
+3363,1995-07-14,999.33
+}}}
+
+= Filtering row according the length of its contents =
+
+The reference `$#N` values the length of the text referred by `$N`.
+
+<wiki:comment>
+{{{
+csvgrep '@hide $0 eq /^N\/A/, ${Name}' Report.csv
+}}}
+
+{{{
+csvgrep '@header @all $NF > 1, $0 eq /^[^,]/; ${Name} eq /Wilson Freitas$/' *.csv
+}}}
+
+{{{
+csvgrep '@any ${*Exposicao} > 0 ; @hide @all ${1:4} != 10'
+}}}
+</wiki:comment>

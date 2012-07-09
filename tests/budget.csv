@@ -1,0 +1,10 @@
+BudgetEntry,name,category,date,amount,scenario,payed
+~,cartão de crédito,Contas,02.12.2008,-6.49,plain vanilla,true
+~,escola,Crianças,04.12.2008,-200.0,plain vanilla
+~,internet,Internet,25.12.2008,-66.30,plain vanilla,FALSE
+,aluguel,Contas SP,29.12.2008,-637.07,plain vanilla,FALSE
+,água,Casa,19.12.2008,0.0,plain vanilla,FALSE
+,gás,Contas SP,27.12.2008,-20.0,plain vanilla,FALSE
+~,luz,Contas SP,11.12.2008,-20.71,plain vanilla,FALSE
+,faxina,Contas SP,15.12.2008,0.0,plain vanilla,FALSE
+,compras,Casa,15.12.2008,-400.0,plain vanilla,FALSE
