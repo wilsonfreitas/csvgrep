@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Csvgrep : Automatically exported from code.google.com/p/csvgrep">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Csvgrep</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wilsonfreitas/csvgrep">View on GitHub</a>
+
+          <h1 id="project_title">Csvgrep</h1>
+          <h2 id="project_tagline">Automatically exported from code.google.com/p/csvgrep</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wilsonfreitas/csvgrep/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wilsonfreitas/csvgrep/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="csvgrep" class="anchor" href="#csvgrep" aria-hidden="true"><span class="octicon octicon-link"></span></a>csvgrep</h1>
+
+<p><strong>csvgrep</strong> is a command line program which enables users to execute searches on text delimited files using a rudimentary <em>query language</em>.
+Its <em>query language</em> is very bounded to simplicity and expressivity (in order to be easily comprehensible).
+It is simple and easy-to-run that <strong>csvgrep</strong> is committed to be.
+It aims at replacing both grep and awk when you are challenged to retrieve information of a text delimited file based on the content of a specific field (or column), you can get what you want using the semantic already presented into the file's underlying structure.
+It is a safe pair of hands to quickly and precisely gather the information you need from a bunch of text files.</p>
+
+<p>Here it goes a few comparisons with unix commands showing how <strong>csvgrep</strong> can safe your time and your brain and I dare say you will have fun using it.</p>
+
+<table>
+<thead>
+<tr>
+<th>Task description</th>
+<th>Unix command</th>
+<th>csvgrep</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Print columns 1,2,4,6 of a csv file</td>
+<td><code>awk 'BEGIN{OFS=","} {print $1,$2,$4,$6}'</code></td>
+<td><code>csvgrep '$1;$2;$4;$6'</code></td>
+</tr>
+<tr>
+<td>Print the second and fifth columns if <br> first column begins with <em>Doe</em> of a pipe delimited file</td>
+<td><code>awk 'BEGIN{OFS="|"} $1 ~ /^Doe/ {print $2,$5}'</code></td>
+<td><code>csvgrep -I='|' '$1 eq /^Doe/; $2 ; $5'</code></td>
+</tr>
+<tr>
+<td>Print <code>Email-column</code> if <code>Name-column</code> <br> begins with <em>Doe</em>
+</td>
+<td><code>-</code></td>
+<td><code>csvgrep '${Name} ne /^Doe/; ${Email}'</code></td>
+</tr>
+<tr>
+<td>Check if the number of input columns <br> remain constant</td>
+<td><code>awk 'NF == 1 {l=NF} NF &gt; 1 {if (l!=NF) print NR}'</code></td>
+<td><code>csvgrep -C '@header $NR == 1'</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>These examples are a great deal far from the real world tasks you are going to face, but despite its simplicity they may give you a good idea on how <strong>csvgrep</strong> can help you.</p>
+
+<p><strong>csvgrep</strong> can do this and much more. So, what are you waiting for? Don't waste your time! Give <strong>csvgrep</strong> a try, I am bounded to believe that it will help you.</p>
+
+<p><strong>Author</strong>
+:   Wilson Freitas -- <a href="http://aboutwilson.net">http://aboutwilson.net</a></p>
+
+<p><strong>csvgrep's project site</strong>
+:   <a href="http://code.google.com/p/csvgrep/">http://code.google.com/p/csvgrep/</a></p>
+
+
+
+<h2>
+<a id="using-csvgrep" class="anchor" href="#using-csvgrep" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using <strong>csvgrep</strong>
+</h2>
+
+<p>Simply type <code>csvgrep -h</code> to exhibit all the <strong>csvgrep</strong>'s options:</p>
+
+<pre><code>Usage: csvgrep [OPTIONS] CODE [FILE]
+
+OPTIONS:
+    -a      [print-all] prints all fields, except with @hide
+    -C      [check] checks whether the number of columns is constant
+    -c      [close] puts one delimiter at the end of each output line
+    -IS     [input-delimiter] sets the input delimiter
+    -OS     [output-delimiter] sets the output delimiter
+    -SS     [io-delimiter] sets input and output delimiters
+    -f      [filename] prints input filename
+    -N      [number] prints line numbers
+    -p      [print-headers] prints headers
+    -s      [headers-only] prints only headers
+    -u      [unquote] unquote output fields
+    -v      [verbose] verbose mode on
+    -V      [version] prints csvgrep's version
+    -h      [help] prints this message
+
+---
+Version 1.0.0
+Mantained by Wilson Freitas
+http://code.google.com/p/csvtools/
+</code></pre>
+
+<p>The <code>CODE</code> above stands for the expressions used by <strong>csvgrep</strong> to filter the desired content.
+These expressions will be discussed in detail in the next sections, we are going to start with several real world examples focusing on the understanding of each of the <strong>csvgrep</strong>'s features.</p>
+
+<h3>
+<a id="the-way-csvgrep-processes-files" class="anchor" href="#the-way-csvgrep-processes-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>The way <strong>csvgrep</strong> processes files</h3>
+
+<p><strong>csvgrep</strong> processes a file exactly the same way grep does, line by line.
+Once we are expecting structured files, they must be structured in columns and also have to have a delimiter separating columns inside the file.
+Despite the file contains columns, when we are processing a line we are dealing with fields, because when we broke the file into lines each line is split into fields.
+These are the components that usually appear while a file is being processed by <strong>csvgrep</strong>.</p>
+
+<h3>
+<a id="the-basic" class="anchor" href="#the-basic" aria-hidden="true"><span class="octicon octicon-link"></span></a>The basic</h3>
+
+<p>As said before, <strong>csvgrep</strong> works pretty much like the well known <code>grep</code> command, so you have text delimited lines and want translate it into useful information.
+It's simple like that, that's the <strong>csvgrep</strong>'s purpose, filter content on text delimited files.
+But where is the difference between <strong>csvgrep</strong> and <code>grep</code>? 
+Since the file is structured in columns <strong>csvgrep</strong> can filter it based on the content of a specific column.
+Considering the file <code>contacts.csv</code></p>
+
+<pre><code>$ cat contacts.csv 
+Name, Email, Notes, IM, Phone
+Wilson, wilson@popstar.com, smart guy, wndf, 555-5555
+Lorie Cabucio, lorie@lovestory.com, Hot, lolo, 555-5435
+Jeckill, jeck@monster.com, , dr.jeckill,
+Nando, nando@nano.com, quant guy, nando,
+Rafaela, rafa@popstar.com, the girl with the dragon tattoo, rafa, 676-9876
+Andrea Martins, andy@popstar.com, likes Dave Mathews Band, andy, 576-0912
+</code></pre>
+
+<p>This file is structured in columns and may represent a contact list where the first line has the header (with the name of each field) and the following lines have valuable information, also organized in columns.
+In order to obtain the complete list of names we do</p>
+
+<pre><code>$ csvgrep '$1' contacts.csv
+Name
+Wilson
+Lorie Cabucio
+Jeckill
+Nando
+Rafaela
+Andrea Martins
+</code></pre>
+
+<p>The expression <code>$1</code> tells <strong>csvgrep</strong> to print the first column of <code>contacts.csv</code> and here we have an important thing being assumed.
+In that example we assumed that the delimiter used into <code>contacts.csv</code> is a single comma (<code>,</code>), if it didn't, <strong>csvgrep</strong> would print the whole file.
+For example, if we had other file called <code>contacts2.csv</code>, using <code>|</code> as delimiter, we would get the following output.</p>
+
+<pre><code>$ cat contacts2.csv 
+Name| Email| Notes| IM| Phone
+Wilson| wilson@popstar.com| smart guy| wndf| 555-5555
+Lorie Cabucio| lorie@lovestory.com| Hot| lolo| 555-5435
+Jeckill| jeck@monster.com| | dr.jeckill|
+Nando| nando@nano.com| quant guy| nando|
+Rafaela| rafa@popstar.com| the girl with the dragon tattoo| rafa| 676-9876
+Andrea Martins| andy@popstar.com| likes Dave Mathews Band| andy| 576-0912
+
+$ csvgrep '$1' contacts2.csv 
+Name| Email| Notes| IM| Phone
+Wilson| wilson@popstar.com| smart guy| wndf| 555-5555
+Lorie Cabucio| lorie@lovestory.com| Hot| lolo| 555-5435
+Jeckill| jeck@monster.com| | dr.jeckill|
+Nando| nando@nano.com| quant guy| nando|
+Rafaela| rafa@popstar.com| the girl with the dragon tattoo| rafa| 676-9876
+Andrea Martins| andy@popstar.com| likes Dave Mathews Band| andy| 576-0912
+</code></pre>
+
+<p>So, for this file, we need to specify the input delimiter using the <code>-I</code> option.</p>
+
+<pre><code>$ csvgrep -I'\|' '$1' contacts2.csv 
+Name
+Wilson
+Lorie Cabucio
+Jeckill
+Nando
+Rafaela
+Andrea Martins
+</code></pre>
+
+<p>Note that since input separator is interpreted as a regular expression in Perl, so if we use <code>|</code> as a delimiter it must be escaped <code>\|</code>.
+The default delimiter for both input and output is the comma character (<code>,</code>).</p>
+
+<p>If we wanted to print also the second column we could simply add <code>$2</code> to our expression to have it done.
+Therefore, when we write the expression, what we do is define which columns we want to print and this behavior reinforces the idea of being-like-grep.
+The columns into the expression are delimited by the semicolon character (<code>;</code>).</p>
+
+<pre><code>$ csvgrep '$1;$2' contacts.csv 
+Name,Email
+Wilson,wilson@popstar.com
+Lorie Cabucio,lorie@lovestory.com
+Jeckill,jeck@monster.com
+Nando,nando@nano.com
+Rafaela,rafa@popstar.com
+Andrea Martins,andy@popstar.com
+</code></pre>
+
+<p>At this point we can see that the expression or either, the code, is formed by references to columns delimited by semicolons.
+So, once you wanted to print the other columns all you have to do is to declare their references.
+If you put a reference to an inexistent column, don't worry, <strong>csvgrep</strong> won't go off on you, an empty column is printed.
+For example, we know <code>contacts.csv</code> has 5 columns, so if we try to print the column <code>$10</code> between <code>$1</code> and <code>$2</code>, we get the following result</p>
+
+<pre><code>$ csvgrep '$1;$10;$2' contacts.csv 
+Name,,Email
+Wilson,,wilson@popstar.com
+Lorie Cabucio,,lorie@lovestory.com
+Jeckill,,jeck@monster.com
+Nando,,nando@nano.com
+Rafaela,,rafa@popstar.com
+Andrea Martins,,andy@popstar.com
+</code></pre>
+
+<p>It doesn't make much sense now but who knows someday it might be useful, perhaps as placeholder generator, think about and if you figure out something, please tell me.</p>
+
+<p>In the end, sometimes you may want to print all columns and it can be done through the option <code>-a</code>.
+I confess that it seems to be useless unless you apply a filter to at least one column, but if you want to change the file delimiter, it can be useful.
+Considering we intend to use semicolon (<code>;</code>) instead of comma (<code>,</code>),
+the whole file could be processed with the following command:</p>
+
+<pre><code>$ csvgrep -a -O';' '' contacts.csv
+Name;Email;Notes;IM;Phone
+Wilson;wilson@popstar.com;smart guy;wndf;555-5555
+Lorie Cabucio;lorie@lovestory.com;Hot;lolo;555-5435
+Jeckill;jeck@monster.com;;dr.jeckill;
+Nando;nando@nano.com;quant guy;nando;
+Rafaela;rafa@popstar.com;the girl with the dragon tattoo;rafa;676-9876
+Andrea Martins;andy@popstar.com;likes Dave Mathews Band;andy;576-0912
+</code></pre>
+
+<p>I know it appears too much simple and of course it could be easily done with grep, fortunately that's the simpler case.
+<strong>csvgrep</strong> handles quoted fields and in such cases it is a pain to change the delimiters when they are supposed to appear inside a quoted field.
+Take a look at the example below:</p>
+
+<pre><code>$ cat quoted.csv 
+Name, Comment
+Hyde, "The guy who didn't sleep, do you believe"
+Loren, "The power, the strength, the energy what was left to us"
+
+$ csvgrep '$2' quoted.csv 
+Comment
+"The guy who didn't sleep, do you believe"
+"The power, the strength, the energy what was left to us"
+
+$ csvgrep -a '' quoted.csv 
+Name,Comment
+Hyde,"The guy who didn't sleep, do you believe"
+Loren,"The power, the strength, the energy what was left to us"
+
+$ csvgrep -a -O: '' quoted.csv 
+Name:Comment
+Hyde:The guy who didn't sleep, do you believe
+Loren:The power, the strength, the energy what was left to us
+</code></pre>
+
+<p>Note that</p>
+
+<ul>
+<li>The file was correctly parsed, even with delimiters inside quoted fields.</li>
+<li>The fields which contain the delimiter inside were printed surrounded with the quotation marks. If we wanted to unquote the fields we should use the <code>-u</code> option (unquote).</li>
+<li>An empty parameter was given.
+That is the expression parameter and since no filter is being applied it goes empty. You can also declare a reference to a column, but it would be ignored because of the <code>-a</code> option use. It seems a little weird or even unnecessary, but that's the way it is.</li>
+</ul>
+
+<p>As we could see <strong>csvgrep</strong> is extremely simple to use and offers a lot of ways for solving annoying problems.
+On next sessions we will look deeply at <strong>csvgrep</strong>'s syntax and its functionalities.</p>
+
+<h3>
+<a id="csvgrep-expression" class="anchor" href="#csvgrep-expression" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<strong>csvgrep</strong> expression</h3>
+
+<p>We saw that after its command-line options <strong>csvgrep</strong> receives one string delimited by single quotation marks (<code>'</code>).
+This parameter is the expression, or either, the code which tells to <strong>csvgrep</strong> what to do.
+This expression contains a list of rules separated by semicolons and each rule is formed by a statement that may be defined under the following pattern:</p>
+
+<pre><code>[EXP-FUNC] REFERENCE [EXP-OP EXP-VALUE]
+</code></pre>
+
+<p>where</p>
+
+<ul>
+<li>
+<code>REFERENCE</code>: a <em>reference</em> in <strong>csvgrep</strong> is a variable which either refers to a field in a row or has its own value as we will see further is the situation of the <em>special references</em>. The section on [References][csvgrepReferences] below explains detailedly its use.</li>
+<li>
+<code>EXP-FUNC</code>: are <em>expression function</em> that are flags attached to a rule in order to affect the way it works. Details on section [Expression functions][csvgrepExpressionFunctions].</li>
+<li>
+<code>EXP-OP</code>: are the <em>expression operator</em>, since the intent is to process the file interacting with its fields, the <strong>csvgrep</strong>'s operators offers different ways for achieving that target. A complete list of operators can be found at section [Operators][csvgrepOperators].</li>
+<li>
+<code>EXP-VALUE</code>: once we use an operator we must pass it one value, so the <em>expression value</em> is the content defined by users in order to find the desired content. An explanation about this is on the same section of [Operators][csvgrepOperators].</li>
+</ul>
+
+<p>So <strong>csvgrep</strong> has these 4 entities and we will see further how easy is to define them for filtering files content.
+Once understood these entities we will be able to define properly the rule, that in its essence is a boolean statement, so it's valued to true or false.
+If all rules in the expression are true the line is printed otherwise it isn't so.
+The next sections will go into details in order to clarify the usage of the expression and its components.</p>
+
+<h4>
+<a id="references-csvgrepreferences" class="anchor" href="#references-csvgrepreferences" aria-hidden="true"><span class="octicon octicon-link"></span></a>References [csvgrepReferences]</h4>
+
+<p>The reference is the most important component of the rule.
+When we declare a reference we are telling to <strong>csvgrep</strong> what we is important for us and what we want to see at the output.
+References are declared starting with a <code>$</code> followed by:</p>
+
+<ul>
+<li>a number (<code>$N</code> numbered references)</li>
+<li>the name of column surrounded with curly braces (<code>${Column Name}</code> named references)</li>
+<li>an identifier as in case of the special references that are variables updated while the lines are being processed.</li>
+</ul>
+
+<p>Numbered references
+:   The numbered references start with <code>$1</code> which indicates the first column and go to infinity since <strong>csvgrep</strong> doesn't go off on you for using an invalid numbered references.
+:   The reference <code>$0</code> indicates the whole line being processed.</p>
+
+<p>Named references
+:   These references must match exactly the column name inside the curly braces.
+For example, the reference <code>${Email}</code> represents the column in which the header has a field that matches <code>Email</code>.
+:   We will see soon that the header must be defined with <code>@header</code> to properly use named references.
+:   Once defined the header you can still used numbered references.</p>
+
+<p>Special references
+:   Can be considered runtime-variables that are alive during the file processing and are ready for being consumed.
+:   <code>$NR</code> is the number of the line currently being processed. The lines start in 1.
+:   <code>$NF</code> is the number of fields in the current line.
+:   <code>$#{.}</code> or <code>$#N</code> evaluates to the length of the referenced text.
+:   <code>$?{.}</code> or <code>$?N</code> evaluates the rule to false if the reference is an empty string, values 0.0 or equals <code>/^false$/i</code></p>
+
+
+
+<h4>
+<a id="operators-csvgrepoperators" class="anchor" href="#operators-csvgrepoperators" aria-hidden="true"><span class="octicon octicon-link"></span></a>Operators [csvgrepOperators]</h4>
+
+<p>The operators are used to compare a field to a user defined value (expression value) for getting the rule evaluated as it does a boolean statement.
+At this moment the expression value cannot be a reference, it only accepts the types handled by <strong>csvgrep</strong>.
+<strong>csvgrep</strong> can handle 2 different types of variables: strings and numbers; and each type has its own set of operators.
+As defined on previous section, the reference might be followed by an operator and by an expression value, always in this order.
+We cannot put the expression value before the operator, it won't work.
+So, the expression values can be defined as:</p>
+
+<ul>
+<li>simple text surrounded with double quotation marks <code>""</code>
+</li>
+<li>regular expression delimited by <code>//</code>
+</li>
+<li>numbers since it matches any decimal number pattern</li>
+<li>shell command surrounded with <code></code><code></code> that is processed and the result is interpreted as text </li>
+</ul>
+
+<p>Internally both <code>""</code> and <code>//</code> are converted to regular expressions.
+Now we will see the operators and some examples on how to use them.</p>
+
+<p>String operators
+:   <code>eq</code>: evaluates to true if the field matches the regular expression
+:   <code>ne</code>: evaluates to true if the field doesn't match the regular expression
+:   <code>in</code>: evaluates to true if the text contains the field</p>
+
+<p>Numeric operators
+:   <code>==</code>: equals
+:   <code>!=</code>: not equals
+:   <code>&gt;</code> : greater than
+:   <code>&gt;=</code>: greater than or equals to
+:   <code>&lt;</code> : less than
+:   <code>&lt;=</code>: less than or equals to</p>
+
+<h4>
+<a id="expression-functions-csvgrepexpressionfunctions" class="anchor" href="#expression-functions-csvgrepexpressionfunctions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Expression Functions [csvgrepExpressionFunctions]</h4>
+
+<p>Sometimes you want that one specific rule behaves in a different way than just being a boolean statement.
+For achieving this target <strong>csvgrep</strong> uses expression functions that are just flags defined into a rule.
+Until now we have only 2 expression functions, so we are accepting suggestions.</p>
+
+<p>Expression functions
+:   <code>@hide</code> is used to omit the field at the output
+:   <code>@header</code> is used to specify the header, when it is present in a rule, this rule is used to match the header. A common use is <code>@header $NR == 1</code> telling <strong>csvgrep</strong> that the header is in the first line.</p>
+
+<h3>
+<a id="using-csvgrep-1" class="anchor" href="#using-csvgrep-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using <strong>csvgrep</strong>
+</h3>
+
+<p>Let's get back to our <code>contacts.csv</code> and now we want to use the header for defining columns.
+To do so we simply use:</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${Name}' contacts.csv 
+Wilson
+Lorie Cabucio
+Jeckill
+Nando
+Rafaela
+Andrea Martins
+</code></pre>
+
+<p>Note that I use <code>${Name}</code> to refer to the column Name and the header line is no longer printed.
+If we wanted to print the header we should use the option <code>-p</code>.
+If I try to refer to a field using its name without to specify how to find the header (with <code>@header</code>), <strong>csvgrep</strong> raises a fatal error message.
+The reference <code>$NR</code> is valued to the current line number (it is similar to NR special variable in AWK), so we are informing that the header is in the first line.</p>
+
+<pre><code>$ csvgrep '${Name}' contacts.csv 
+Fatal: The @header field must be defined at ../csvgrep.pl line 160, &lt;INPUT_FILE&gt; line 1.
+</code></pre>
+
+
+
+<p>We can define the header using other expressions</p>
+
+<pre><code>$ csvgrep '@header $1 eq "Name" ; ${Name}' contacts.csv
+Wilson
+Lorie Cabucio
+Jeckill
+Nando
+Rafaela
+Andrea Martins
+</code></pre>
+
+<p>But it's always important to be consistent with the header definition because the header is reset each time the header-rule is true.</p>
+
+<p>We can go forward and see an example where a boolean expression is used to <em>grep</em> file's contents based on its columns, that's the most common use to <strong>csvgrep</strong>, at least in my opinion.
+Let's find the email of a girl with the name <em>Lorie</em>:</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${Name} eq "Lorie" ; ${Email}' contacts.csv
+Lorie Cabucio,lorie@lovestory.com
+</code></pre>
+
+
+
+<p>Since <strong>csvgrep</strong> compiles the quoted text as a Perl regular expression all types of regular expressions supported by Perl can be used within <strong>csvgrep</strong>.</p>
+
+<p>We also have the operator <code>ne</code> (that negates the operator <code>eq</code>) and we can use it to find the contacts with non-empty phone number.</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${Name} ; ${Phone} ne "^$"' contacts.csv 
+Wilson,555-5555
+Lorie Cabucio,555-5435
+Rafaela,676-9876
+Andrea Martins,576-0912
+
+$ csvgrep '@header $NR == 1; ${Name} ; ${Phone} eq "^$"' contacts.csv 
+Jeckill,
+Nando,
+</code></pre>
+
+<p><strong>csvgrep</strong> printed lines which the regular expression <code>"^$"</code> didn't match the phone number.
+The trailing spaces in the fields values are removed before it's processed, so blank spaced fields are empty for <strong>csvgrep</strong>.</p>
+
+<p>Every column declare as a reference in one rule is printed, but sometimes it's interesting to omit that column from the output.
+It can be done using the expression function <code>@hide</code>.</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${Name} ; @hide ${Phone} eq /^$/' contacts.csv 
+Jeckill
+Nando
+</code></pre>
+
+<p>In this example we are saying to <strong>csvgrep</strong> to <em>hide</em> the phone column, so it's not sent to the output and only the contacts that have an empty phone number were printed.
+We can stack as many expression as we want and build more sophisticated queries</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${Name} ; ${Phone} ne /^$/ ; @hide ${Email} eq "@popstar" ; @hide ${Notes} eq "tattoo"' contacts.csv
+Rafaela,676-9876
+</code></pre>
+
+<hr>
+
+<p>In some cases it is useful to find contents inside a list and for this task we have the <code>in</code> operator.</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${IM} in "rafa lolo manu laura ana joana" ; ${Name} ; ${Phone}' contacts.csv
+lolo,Lorie Cabucio,555-5435
+rafa,Rafaela,676-9876
+</code></pre>
+
+<p>it could also be done with a regular expression</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${IM} eq "rafa|lolo|manu|laura|ana|joana" ; ${Name} ; ${Phone}' contacts.csv
+lolo,Lorie Cabucio,555-5435
+rafa,Rafaela,676-9876
+</code></pre>
+
+<p>The <code>in</code> operator is most useful when applied to search for a content into a file.</p>
+
+<pre><code>$ csvgrep '@header $NR == 1; ${IM} in `cat names.txt` ; ${Name} ; ${Phone}' contacts.csv
+lolo,Lorie Cabucio,555-5435
+rafa,Rafaela,676-9876
+</code></pre>
+
+<p>where</p>
+
+<pre><code>$ cat names.txt 
+rafa
+lolo
+manu
+laura
+ana
+</code></pre>
+
+<p>The string delimited by the grave accent is executed as a shell command and its output text is used as text into the expression value.</p>
+
+<hr>
+
+<p>Let's take a look at another file.</p>
+
+<pre><code>Date,Open,High,Low,Close,Volume,Adj Close
+2008-11-17,1494.74,1526.96,1481.70,1482.05,1831540000,1482.05
+2008-11-14,1560.59,1587.76,1513.09,1516.85,2243750000,1516.85
+2008-11-13,1503.06,1596.70,1428.54,1596.70,3009550000,1596.70
+...
+1971-02-09,100.76,100.76,100.76,100.76,000,100.76
+1971-02-08,100.84,100.84,100.84,100.84,000,100.84
+1971-02-05,100.00,100.00,100.00,100.00,000,100.00
+</code></pre>
+
+<p>This files was downloaded from <a href="http://finance.yahoo.com">Yahoo Finance</a> and it has the stock values of some company.
+The dates range from 05/02/1971 to 11/17/2008 and we want to find the dates where the Close price has broken the $1000 level.</p>
+
+<pre><code>$ csvgrep '@header $NR == 1 ; $NR ; ${Date} ; ${Close} &gt;= 999 ; @hide ${Close} &lt;= 1001' table1.csv
+3344,1995-08-10,1000.61
+3355,1995-07-26,1000.18
+3363,1995-07-14,999.33
+</code></pre>
+
+<p>We can see the on date 07/14/1995 the Close price was very close to $1000.</p>
+
+<p>One important thing to mention about operators that handle numeric operands is the coercion rules:</p>
+
+<ol>
+<li>the column's content comes as text.</li>
+<li>the text is coerced to a number following Perl's coercion engine: any text that doesn't represents a number values 0.</li>
+<li>Missing fields are empty strings, so in a numeric context it values 0.</li>
+</ol>
+
+<p>Let's suppose now that we want get all points after the break of $1000.
+We saw that the break had occurred approximately on 07/14/1995, so we can get all data after this date.
+This date is in the line number 3363, so as the data is listed with decreasing date, we want all lines with <code>$NR</code> less than 3363:</p>
+
+<pre><code>$ csvgrep '@header $NR == 1 ; $NR &lt;= 3363 ; ${Date} ; ${Close}' table1.csv
+2,2008-11-17,1482.05
+3,2008-11-14,1516.85
+4,2008-11-13,1596.70
+5,2008-11-12,1499.21
+...
+3360,1995-07-19,952.87
+3361,1995-07-18,988.53
+3362,1995-07-17,1005.89
+3363,1995-07-14,999.33
+</code></pre>
+
+<p>the line number is the first field at the output, to hide it use <code>@hide</code> within the first rule.</p>
+
+
+
+<hr>
+
+<p>A simple way to quickly evaluate a field regarding whether or not it has a valid content is using the question mark reference <code>$?N</code> or <code>$?{.}</code>.</p>
+
+<pre><code>$ csvgrep -aN '' bool.csv 
+1:Zero,0.0
+2:Minus Zero,-0.0
+3:False,false
+4:True,true
+5:One,1
+6:One Decimal,1.0
+7:Minus One Decimal,-1.0
+8:Empty,
+
+$ csvgrep '$NR ; $1 ; $?2' bool.csv 
+4,True,true
+5,One,1
+6,One Decimal,1.0
+7,Minus One Decimal,-1.0
+
+$ csvgrep '$NR ; $?1 ; $2' bool.csv 
+1,Zero,0.0
+2,Minus Zero,-0.0
+4,True,true
+5,One,1
+6,One Decimal,1.0
+7,Minus One Decimal,-1.0
+8,Empty,
+</code></pre>
+
+<p>As we can see all fields with</p>
+
+<ul>
+<li>0.0</li>
+<li>false (ignoring case)</li>
+<li>/^$/ (empty)</li>
+</ul>
+
+<p>were evaluated to false.</p>
+
+<p>Pay attention to the first command, it uses the option <code>-N</code> to print the line numbers.</p>
+
+<hr>
+
+<p>For checking whether the number of fields remains constant in the file respecting the defined header or not, we have the option <code>-C</code> that returns 0 for the shell in case of success or 2 in case of failure indicating that at some point into the file the number of fields is different from the number of columns defined by the header.</p>
+
+<pre><code>$ csvgrep -C '@header $NR == 1' table1.csv
+
+$ echo $?
+0
+
+$ csvgrep -C '@header $NR == 1' table2.csv 
+
+$ echo $?
+2
+
+$ cat table2.csv 
+Date,Open,High,Low,Close,Volume,Adj Close
+2008-11-17,1494.74,1526.96,1481.70,1482.05,1831540000,1482.05
+2008-11-14,1560.59,1587.76,1513.09,1516.85
+</code></pre>
+
+<hr>
+
+<p>Sometimes it is useful to put a delimiter at the end of each line sent to output.
+The option <code>-c</code>, close-line command, solves that problem.</p>
+
+<pre><code>$ csvgrep -c -O':' '@header $NR == 1; ${Name} ; ${Phone} ne "^$"' contacts.csv 
+Wilson:555-5555:
+Lorie Cabucio:555-5435:
+Rafaela:676-9876:
+Andrea Martins:576-0912:
+</code></pre>
+
+<hr>
+
+<p>As seen before, when the field contains a delimiter it is printed surrounded with quotation marks.
+In order to have that field unquoted we should use the option <code>-u</code> (unquote).</p>
+
+<pre><code>$ csvgrep -a '' quoted.csv 
+Name,Comment
+Hyde,"The guy who didn't sleep, do you believe"
+Loren,"The power, the strength, the energy what was left to us"
+
+$ csvgrep -au '' quoted.csv 
+Name,Comment
+Hyde,The guy who didn't sleep, do you believe
+Loren,The power, the strength, the energy what was left to us
+</code></pre>
+
+<hr>
+
+<p>Though its simplicity <strong>csvgrep</strong> makes a great job solving some well defined problems when handling with structured files.
+I will continue looking forward to find ways to improve <strong>csvgrep</strong>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Csvgrep maintained by <a href="https://github.com/wilsonfreitas">wilsonfreitas</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
