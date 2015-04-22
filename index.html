@@ -1,86 +1,31 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Csvgrep : Automatically exported from code.google.com/p/csvgrep">
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>csvgrep</title>
+    <meta charset="UTF-8">
+    <title>csvgrep by wilsonfreitas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
+    <section class="page-header">
+      <h1 class="project-name">csvgrep</h1>
+      <h2 class="project-tagline">Easy and funny searches on text delimited files</h2>
+      <a href="https://github.com/wilsonfreitas/csvgrep" class="btn">View on GitHub</a>
+      <a href="https://github.com/wilsonfreitas/csvgrep/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/wilsonfreitas/csvgrep/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/wilsonfreitas/csvgrep">View on GitHub</a>
-
-          <h1 id="project_title">csvgrep</h1>
-          <h2 id="project_tagline">Easy and funny searches on text delimited files</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/wilsonfreitas/csvgrep/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/wilsonfreitas/csvgrep/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-<p><strong>csvgrep</strong> is a command line program which enables users to execute searches on text delimited files using a rudimentary <em>query language</em>.
+    <section class="main-content">
+      <p><strong>csvgrep</strong> is a command line program which enables users to execute searches on text delimited files using a rudimentary <em>query language</em>.
 Its <em>query language</em> is very bounded to simplicity and expressivity (in order to be easily comprehensible).
 It is simple and easy-to-run that <strong>csvgrep</strong> is committed to be.
 It aims at replacing both grep and awk when you are challenged to retrieve information of a text delimited file based on the content of a specific field (or column), you can get what you want using the semantic already presented into the file's underlying structure.
 It is a safe pair of hands to quickly and precisely gather the information you need from a bunch of text files.</p>
 
-<p>Here it goes a few comparisons with unix commands showing how <strong>csvgrep</strong> can safe your time and your brain and I dare say you will have fun using it.</p>
 
-<table>
-<thead>
-<tr>
-<th>Task description</th>
-<th>Unix command</th>
-<th>csvgrep</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Print columns 1,2,4,6 of a csv file</td>
-<td><code>awk 'BEGIN{OFS=","} {print $1,$2,$4,$6}'</code></td>
-<td><code>csvgrep '$1;$2;$4;$6'</code></td>
-</tr>
-<tr>
-<td>Print the second and fifth columns if <br> first column begins with <em>Doe</em> of a pipe delimited file</td>
-<td><code>awk 'BEGIN{OFS="|"} $1 ~ /^Doe/ {print $2,$5}'</code></td>
-<td><code>csvgrep -I='|' '$1 eq /^Doe/; $2 ; $5'</code></td>
-</tr>
-<tr>
-<td>Print <code>Email-column</code> if <code>Name-column</code> <br> begins with <em>Doe</em>
-</td>
-<td><code>-</code></td>
-<td><code>csvgrep '${Name} ne /^Doe/; ${Email}'</code></td>
-</tr>
-<tr>
-<td>Check if the number of input columns <br> remain constant</td>
-<td><code>awk 'NF == 1 {l=NF} NF &gt; 1 {if (l!=NF) print NR}'</code></td>
-<td><code>csvgrep -C '@header $NR == 1'</code></td>
-</tr>
-</tbody>
-</table>
-
-<p>These examples are a great deal far from the real world tasks you are going to face, but despite its simplicity they may give you a good idea on how <strong>csvgrep</strong> can help you.</p>
-
-<p><strong>csvgrep</strong> can do this and much more. So, what are you waiting for? Don't waste your time! Give <strong>csvgrep</strong> a try, I am bounded to believe that it will help you.</p>
-
-<p><strong>Author</strong>
-:   Wilson Freitas -- <a href="http://aboutwilson.net">http://aboutwilson.net</a></p>
-
-<p><strong>csvgrep's project site</strong>
-:   <a href="https://github.com/wilsonfreitas/csvgrep">https://github.com/wilsonfreitas/csvgrep</a></p>
 
 
 
@@ -308,7 +253,7 @@ If all rules in the expression are true the line is printed otherwise it isn't s
 The next sections will go into details in order to clarify the usage of the expression and its components.</p>
 
 <h4>
-<a id="references-csvgrepreferences" class="anchor" href="#references-csvgrepreferences" aria-hidden="true"><span class="octicon octicon-link"></span></a>References [csvgrepReferences]</h4>
+<a id="references" class="anchor" href="#references" aria-hidden="true"><span class="octicon octicon-link"></span></a>References</h4>
 
 <p>The reference is the most important component of the rule.
 When we declare a reference we are telling to <strong>csvgrep</strong> what we is important for us and what we want to see at the output.
@@ -340,7 +285,7 @@ For example, the reference <code>${Email}</code> represents the column in which 
 
 
 <h4>
-<a id="operators-csvgrepoperators" class="anchor" href="#operators-csvgrepoperators" aria-hidden="true"><span class="octicon octicon-link"></span></a>Operators [csvgrepOperators]</h4>
+<a id="operators" class="anchor" href="#operators" aria-hidden="true"><span class="octicon octicon-link"></span></a>Operators</h4>
 
 <p>The operators are used to compare a field to a user defined value (expression value) for getting the rule evaluated as it does a boolean statement.
 At this moment the expression value cannot be a reference, it only accepts the types handled by <strong>csvgrep</strong>.
@@ -375,7 +320,7 @@ Now we will see the operators and some examples on how to use them.</p>
 :   <code>&lt;=</code>: less than or equals to</p>
 
 <h4>
-<a id="expression-functions-csvgrepexpressionfunctions" class="anchor" href="#expression-functions-csvgrepexpressionfunctions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Expression Functions [csvgrepExpressionFunctions]</h4>
+<a id="expression-functions" class="anchor" href="#expression-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Expression Functions</h4>
 
 <p>Sometimes you want that one specific rule behaves in a different way than just being a boolean statement.
 For achieving this target <strong>csvgrep</strong> uses expression functions that are just flags defined into a rule.
@@ -649,18 +594,16 @@ Loren,The power, the strength, the energy what was left to us
 
 <p>Though its simplicity <strong>csvgrep</strong> makes a great job solving some well defined problems when handling with structured files.
 I will continue looking forward to find ways to improve <strong>csvgrep</strong>.</p>
-      </section>
-    </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Csvgrep maintained by <a href="https://github.com/wilsonfreitas">wilsonfreitas</a></p>
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/wilsonfreitas/csvgrep">csvgrep</a> is maintained by <a href="https://github.com/wilsonfreitas">wilsonfreitas</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
 
-    
+    </section>
 
+  
   </body>
 </html>
+
